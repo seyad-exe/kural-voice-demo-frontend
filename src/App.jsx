@@ -77,12 +77,14 @@ function App() {
       setIsRecording(false);
     }
   };
-
-  // Prevent default context menu on mobile long-press
-  const handleTouchStart = (e) => {
-    e.preventDefault(); 
+  const toggleRecording = () => {
+  if (isRecording) {
+    stopRecording();
+  } else {
     startRecording();
-  };
+  }
+};
+
 
   // --- DASHBOARD LOGIC ---
   const fetchDashboard = async (query = "") => {
@@ -155,18 +157,18 @@ function App() {
         {activeTab === 'kiosk' && (
           <div className="kiosk-wrapper">
             <h2>Leave Your Feedback</h2>
-            <p>Hold the button to speak (Tamil and/or English)</p>
+            <p>
+  Record your feedback in English or Tamil.
+</p>
             
-            <button 
-              className={`record-btn ${isRecording ? 'recording' : ''}`}
-              onMouseDown={startRecording}
-              onMouseUp={stopRecording}
-              onMouseLeave={stopRecording}
-              onTouchStart={handleTouchStart}
-              onTouchEnd={stopRecording}
-            >
-              {isRecording ? "Listening..." : "Press & Hold to Speak"}
-            </button>
+            <button
+  className={`record-btn ${isRecording ? 'recording' : ''}`}
+  onClick={toggleRecording}
+>
+  {isRecording
+    ? "⏹ Tap to Stop"
+    : "🎙 Tap to Record"}
+</button>
             
             <div className="status-text" style={{ color: status.includes('Error') ? 'var(--danger)' : 'var(--text)' }}>
               {status}
