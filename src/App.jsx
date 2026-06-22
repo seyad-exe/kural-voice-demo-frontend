@@ -167,7 +167,7 @@ function App() {
 >
   {isRecording
     ? "⏹ Tap to Stop"
-    : "🎙 Tap to Record"}
+    : "Tap to Record"}
 </button>
             
             <div className="status-text" style={{ color: status.includes('Error') ? 'var(--danger)' : 'var(--text)' }}>
