@@ -20,6 +20,7 @@ function App() {
   // Audio Refs
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const recordingTimeoutRef = useRef(null);
 
   // --- KIOSK LOGIC ---
   const startRecording = async () => {
@@ -59,6 +60,15 @@ function App() {
       };
 
       mediaRecorderRef.current.start();
+      recordingTimeoutRef.current = setTimeout(() => {
+  if (
+    mediaRecorderRef.current &&
+    mediaRecorderRef.current.state === "recording"
+  ) {
+    stopRecording();
+    setStatus("Maximum recording time reached (30 seconds)");
+  }
+}, 30000);
       setIsRecording(true);
       setStatus("Recording... Speak now.");
       setDetails("");
@@ -70,6 +80,10 @@ function App() {
   };
 
   const stopRecording = () => {
+    if (recordingTimeoutRef.current) {
+  clearTimeout(recordingTimeoutRef.current);
+  recordingTimeoutRef.current = null;
+}
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       // Stop all audio tracks to release the microphone
