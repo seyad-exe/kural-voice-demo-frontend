@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 // Point this to your FastAPI backend
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://kural-voice-demo-backend.onrender.com';
 
 function App() {
   const [activeTab, setActiveTab] = useState('kiosk');
