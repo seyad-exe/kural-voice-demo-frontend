@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 // change these URLs based on your deployment
-//const API_BASE_URL = 'https://kural-voice-demo-backend.onrender.com';
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://kural-voice-demo-backend.onrender.com';
+//const API_BASE_URL = 'http://127.0.0.1:8000';
 
 function App() {
   const [activeTab, setActiveTab] = useState('kiosk');
