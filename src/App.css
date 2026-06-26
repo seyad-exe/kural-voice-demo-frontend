@@ -1,6 +1,6 @@
 :root {
   --primary: #7C6CFF;
-  --primary-light: #9B8DFF;
+  --primary-light: #241b64;
 
   --success: #22C55E;
   --danger: #EF4444;
@@ -9,7 +9,7 @@
   --bg: #1E1E1E;
   --card-bg: #2A2A2A;
 
-  --text: #F8FAFC;
+  --text: #5c0aff;
   --text-light: #A1A1AA;
 
   --shadow:
@@ -51,19 +51,12 @@ background:
   margin: 0;
 }
 
-/* ------------------- */
-/* MAIN CONTAINER */
-/* ------------------- */
 
 .app-container {
 min-height: 100vh;
 display: flex;
 flex-direction: column;
 }
-
-/* ------------------- */
-/* TOP NAV */
-/* ------------------- */
 
 .tabs {
   display: flex;
@@ -114,9 +107,6 @@ box-shadow:
 0 10px 25px rgba(108,99,255,0.3);
 }
 
-/* ------------------- */
-/* CONTENT */
-/* ------------------- */
 
 .content {
 width: 100%;
@@ -126,9 +116,7 @@ margin: 0 auto;
 padding: 24px;
 }
 
-/* ------------------- */
-/* KIOSK */
-/* ------------------- */
+
 
 .kiosk-wrapper {
 min-height: 75vh;
@@ -152,10 +140,6 @@ text-align: center;
 color: var(--text-light);
 margin-bottom: 40px;
 }
-
-/* ------------------- */
-/* RECORD BUTTON */
-/* ------------------- */
 
 .record-btn {
 width: 280px;
@@ -233,9 +217,7 @@ margin-top: 12px;
 color: var(--text-light);
 }
 
-/* ------------------- */
-/* SEARCH BAR */
-/* ------------------- */
+
 
 .search-bar {
   width: 100%;
@@ -268,9 +250,6 @@ box-shadow:
 0 0 0 4px rgba(108,99,255,0.15);
 }
 
-/* ------------------- */
-/* DASHBOARD GRID */
-/* ------------------- */
 
 .feed-grid {
 display: grid;
@@ -280,9 +259,7 @@ grid-template-columns:
 repeat(auto-fit, minmax(300px, 1fr));
 }
 
-/* ------------------- */
-/* CARD */
-/* ------------------- */
+
 
 .card {
   background: var(--card-bg);
@@ -323,9 +300,7 @@ line-height: 1.7;
 margin: 18px 0;
 }
 
-/* ------------------- */
-/* BADGES */
-/* ------------------- */
+
 
 .badge {
 display: inline-flex;
@@ -372,9 +347,7 @@ background: var(--warning);
   font-size: 13px;
 }
 
-/* ------------------- */
-/* MOBILE */
-/* ------------------- */
+
 
 @media (max-width: 768px) {
 .content {
@@ -426,4 +399,26 @@ font-size: 14px;
   color: #ff6b6b;
   font-size: 18px;
   font-weight: 700;
+}
+/* Search & Filter Layout */
+.dashboard-controls { display: flex; gap: 10px; margin-bottom: 25px; }
+.search-bar { flex: 1; margin-bottom: 0; }
+.filter-dropdown { padding: 16px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; background-color: rgb(28, 4, 52); cursor: pointer; outline: none; }
+
+/* Modal Styles */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; box-sizing: border-box; backdrop-filter: blur(3px); }
+.modal-content { background: white; padding: 30px; border-radius: 16px; width: 100%; max-width: 400px; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; animation: slideUp 0.3s ease-out; }
+.close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; border: none; background: none; cursor: pointer; color: #888; transition: 0.2s; }
+.close-btn:hover { color: var(--danger); }
+
+.modal-summary { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 15px; line-height: 1.5; color: #444; border-left: 4px solid var(--primary); text-align: left; }
+
+/* Processing Spinner */
+.spinner { width: 40px; height: 40px; border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .dashboard-controls { flex-direction: column; }
 }

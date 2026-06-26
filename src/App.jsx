@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
 
-// Point this to your FastAPI backend
-const API_BASE_URL = 'https://kural-voice-demo-backend.onrender.com';
+// change these URLs based on your deployment
+//const API_BASE_URL = 'https://kural-voice-demo-backend.onrender.com';
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
 function App() {
   const [activeTab, setActiveTab] = useState('kiosk');
@@ -14,16 +15,23 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [status, setStatus] = useState('Ready');
   const [details, setDetails] = useState('');
+
+  // Modal State
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [isProcessing, setIsProcessing] = useState(false);
+const [modalData, setModalData] = useState(null);
   
   // Dashboard State
   const [insights, setInsights] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [sentimentFilter, setSentimentFilter] = useState('All');
 
   // Audio Refs
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const recordingTimeoutRef = useRef(null);
+  const pollingIntervalRef = useRef(null);
 
   useEffect(() => {
   if (!isRecording) return;
@@ -67,9 +75,11 @@ function App() {
           const result = await response.json();
           
           if (result.status === "queued") {
-            setStatus("Feedback Submitted Successfully!");
-            setDetails(`Job ID: ${result.job_id}`);
-          } else {
+  setStatus("Processing feedback...");
+  setDetails("");
+
+  startPolling(result.job_id);
+} else {
             setStatus(result.message || "Upload failed.");
           }
         } catch (err) {
@@ -98,23 +108,57 @@ function App() {
     }
   };
 
-  const stopRecording = () => {
+const stopRecording = () => {
     if (recordingTimeoutRef.current) {
-  clearTimeout(recordingTimeoutRef.current);
-  recordingTimeoutRef.current = null;
-}
-    if (mediaRecorderRef.current && isRecording) {
+      clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = null;
+    }
+    
+    // FIX: Check the MediaRecorder's internal state, not the React state variable
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       // Stop all audio tracks to release the microphone
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-      setIsRecording(false);
     }
+    
+    // Always ensure the UI state is reset to false
+    setIsRecording(false);
   };
   const toggleRecording = () => {
   if (isRecording) {
     stopRecording();
   } else {
     startRecording();
+  }
+};
+
+const startPolling = (jobId) => {
+  setIsModalOpen(true);
+  setIsProcessing(true);
+  setModalData(null);
+
+  pollingIntervalRef.current = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/job/${jobId}`);
+      const result = await res.json();
+
+      if (result.status === "completed") {
+        setModalData(result.data);
+        setIsProcessing(false);
+
+        clearInterval(pollingIntervalRef.current);
+      }
+    } catch (err) {
+      console.error("Polling error:", err);
+    }
+  }, 2000);
+};
+
+const closeModal = () => {
+  setIsModalOpen(false);
+
+  if (pollingIntervalRef.current) {
+    clearInterval(pollingIntervalRef.current);
   }
 };
 
@@ -147,6 +191,14 @@ function App() {
       setIsLoading(false);
     }
   };
+  const displayedInsights = insights.filter((item) => {
+  if (sentimentFilter === 'All') return true;
+
+  return (
+    item.sentiment.toLowerCase() ===
+    sentimentFilter.toLowerCase()
+  );
+});
 
   // Fetch data when switching to dashboard tab
   useEffect(() => {
@@ -218,13 +270,28 @@ function App() {
         {/* --- DASHBOARD VIEW --- */}
         {activeTab === 'dashboard' && (
           <div>
-            <input 
-              type="text" 
-              className="search-bar" 
-              placeholder="Semantic search... e.g., 'complaints about spicy food'"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <div className="dashboard-controls">
+
+  <input
+    type="text"
+    className="search-bar"
+    placeholder="Semantic search... e.g. complaints about food"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+
+  <select
+    className="filter-dropdown"
+    value={sentimentFilter}
+    onChange={(e) => setSentimentFilter(e.target.value)}
+  >
+    <option value="All">All Sentiments</option>
+    <option value="Positive">Positive</option>
+    <option value="Neutral">Neutral</option>
+    <option value="Negative">Negative</option>
+  </select>
+
+</div>
             
             {isLoading ? (
               <div className="loading">
@@ -232,7 +299,7 @@ function App() {
               </div>
             ) : insights.length > 0 ? (
               <div className="feed-grid">
-                {insights.map((item) => (
+                {displayedInsights.map((item) => (
                   <div className="card" key={item.id}>
                     <span className="category">{item.category}</span>
                     <span className={`badge ${item.sentiment.toLowerCase()}`}>
@@ -252,12 +319,58 @@ function App() {
                 ))}
               </div>
             ) : (
-              <p>No feedback found.</p>
+              <p>No feedback found matching the selected filters.</p>
             )}
           </div>
         )}
 
       </div>
+      {isModalOpen && (
+  <div className="modal-overlay">
+
+    <div className="modal-content">
+
+      <button
+        className="close-btn"
+        onClick={closeModal}
+      >
+        &times;
+      </button>
+
+      {isProcessing ? (
+        <>
+          <h3>Processing Feedback...</h3>
+
+          <p>
+            Extracting sentiment and insights.
+          </p>
+
+          <div className="spinner"></div>
+        </>
+      ) : (
+        <>
+          <h3>✅ Feedback Submitted</h3>
+
+          <div className="modal-summary">
+            <strong>Summary:</strong>
+
+            <p>{modalData?.summary}</p>
+          </div>
+
+          <div style={{ marginTop: '15px' }}>
+            <span
+              className={`badge ${modalData?.sentiment?.toLowerCase()}`}
+            >
+              {modalData?.sentiment}
+            </span>
+          </div>
+        </>
+      )}
+
+    </div>
+
+  </div>
+)}
     </div>
   );
 }
