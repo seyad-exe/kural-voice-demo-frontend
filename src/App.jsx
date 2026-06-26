@@ -6,6 +6,9 @@ const API_BASE_URL = 'https://kural-voice-demo-backend.onrender.com';
 
 function App() {
   const [activeTab, setActiveTab] = useState('kiosk');
+
+  //timer
+  const [timeLeft, setTimeLeft] = useState(30);
   
   // Kiosk State
   const [isRecording, setIsRecording] = useState(false);
@@ -21,6 +24,22 @@ function App() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const recordingTimeoutRef = useRef(null);
+
+  useEffect(() => {
+  if (!isRecording) return;
+
+  const interval = setInterval(() => {
+    setTimeLeft((prev) => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [isRecording]);
 
   // --- KIOSK LOGIC ---
   const startRecording = async () => {
@@ -58,7 +77,7 @@ function App() {
           console.error(err);
         }
       };
-
+      setTimeLeft(30);
       mediaRecorderRef.current.start();
       recordingTimeoutRef.current = setTimeout(() => {
   if (
@@ -183,6 +202,11 @@ function App() {
     ? "⏹ Tap to Stop"
     : "Tap to Record"}
 </button>
+{isRecording && (
+  <div className="timer">
+    {timeLeft}s remaining
+  </div>
+)}
             
             <div className="status-text" style={{ color: status.includes('Error') ? 'var(--danger)' : 'var(--text)' }}>
               {status}

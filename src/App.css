@@ -421,3 +421,9 @@ font-size: 14px;
   color:var(--text-light);
   font-weight:600;
 }
+.timer {
+  margin-top: 15px;
+  color: #ff6b6b;
+  font-size: 18px;
+  font-weight: 700;
+}
